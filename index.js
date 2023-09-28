@@ -1,41 +1,64 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, NewsChannel, TextChannel, EmbedBuilder } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { token } = require('./config.json');
 const { JsonDB, Config } = require('node-json-db');
-const http = require("http")
-var db = new JsonDB(new Config("channelDb1", true, false, '/'));
+const http = require("http");
+
+const db = new JsonDB(new Config("channelDb1", true, false, '/'));
 const host = '0.0.0.0';
 const port = 8080;
+
 const requestListener = function(req, res) {
   res.writeHead(200);
   res.end("My first server!");
 };
+
 const server = http.createServer(requestListener);
 server.listen(port, host, () => {
   console.log(`Server is running on http://${host}:${port}`);
 });
 
-// Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+client.commands = new Collection();
 
-// When the client is ready, run this code (only once)
-// We use 'c' for the event parameter to keep it separate from the already defined 'client'
-client.once(Events.ClientReady, async c => {
+const loadCommands = () => {
+  const foldersPath = path.join(__dirname, 'commands');
+  const commandFolders = fs.readdirSync(foldersPath);
+
+  for (const folder of commandFolders) {
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      const command = require(filePath);
+
+      if ('data' in command && 'execute' in command) {
+        client.commands.set(command.data.name, command);
+      } else {
+        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+      }
+    }
+  }
+};
+
+client.once(Events.ClientReady, async (c) => {
   try {
     require('./deploy-commands.js');
   } catch (error) {
     console.log(error);
     return;
   }
+
   console.log(`Ready! Logged in as ${c.user.tag}`);
-  console.log(eval(2 + 2))
+  console.log(eval(2 + 2));
 });
 
-client.on(Events.InteractionCreate, async interaction => {
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  const command = interaction.client.commands.get(interaction.commandName);
+  const command = client.commands.get(interaction.commandName);
 
   if (!command) {
     console.error(`No command matching ${interaction.commandName} was found.`);
@@ -46,6 +69,7 @@ client.on(Events.InteractionCreate, async interaction => {
     await command.execute(interaction);
   } catch (error) {
     console.error(error);
+
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
     } else {
@@ -54,124 +78,107 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-client.commands = new Collection();
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
-
-for (const folder of commandFolders) {
-  const commandsPath = path.join(foldersPath, folder);
-  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-    // Set a new item in the Collection with the key as the command name and the value as the exported module
-    if ('data' in command && 'execute' in command) {
-      client.commands.set(command.data.name, command);
-    } else {
-      console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-    }
-  }
-};
-
-async function callStart(person, channel) {
+const callStart = async (person, channel) => {
   const dateandtime = new Date().toLocaleString("en-BZ", { hour12: true }).replace('pm', 'ΜΜ').replace('am', 'ΠΜ');
   const absolutedat = new Date();
-  const pid = person.id
+  const pid = person.id;
+
   await db.push("/" + channel, { pid, dateandtime, absolutedat });
+
   const channel13 = await client.channels.fetch("1141341457706405978");
   const embed2 = new EmbedBuilder()
     .setTitle("Νέα Κλήση")
-    .setDescription("Ο/Η <@" + pid + "> Ξεκίνησε μια κλήση στο κανάλι φωνής <#1141337672477065227>, στις " + dateandtime + ".")
+    .setDescription(`Ο/Η <@${pid}> Ξεκίνησε μια κλήση στο κανάλι φωνής <#1141337672477065227>, στις ${dateandtime}.`)
     .setColor("#00b0f4")
     .setFooter({
       text: "Gamecraft Bot",
       iconURL: "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg",
     })
     .setTimestamp();
-  channel13.send("@everyone \n")
-  channel13.send({ embeds: [embed2] })
+
+  channel13.send("@everyone \n");
+  channel13.send({ embeds: [embed2] });
 };
 
-function msToTime(duration) {
-  var milliseconds = Math.floor((duration % 1000) / 100),
-    seconds = Math.floor((duration / 1000) % 60),
-    minutes = Math.floor((duration / (1000 * 60)) % 60),
-    hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+const msToTime = (duration) => {
+  let milliseconds = Math.floor((duration % 1000) / 100);
+  let seconds = Math.floor((duration / 1000) % 60);
+  let minutes = Math.floor((duration / (1000 * 60)) % 60);
+  let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
 
   hours = (hours < 10) ? "" + hours : hours;
   minutes = (minutes < 10) ? "" + minutes : minutes;
   seconds = (seconds < 10) ? "" + seconds : seconds;
 
-  return hours + " ώρες, " + minutes + " λεπτά και " + seconds + " δευτερόλεπτα."// + milliseconds;
-}
+  return `${hours} ώρες, ${minutes} λεπτά και ${seconds} δευτερόλεπτα.`;
+};
 
-async function callEnd(channel) {
-  //const yeydasd = await db.getObjectDefault("[0][3]", ":crazycat:")
-  var yeydasd
+const callEnd = async (channel) => {
+  let yeydasd;
+
   try {
     yeydasd = await db.getData("/" + channel);
-    yeydasd = yeydasd["absolutedat"]
+    yeydasd = yeydasd["absolutedat"];
   } catch (error) {
-    // The error will tell you where the DataPath stopped. In this case test1
-    // Since /test1/test does't exist.
     console.error(error);
-  };
+  }
+
   const channel13 = await client.channels.fetch("1141341457706405978");
   const embed3 = new EmbedBuilder()
     .setTitle("Τέλος Κλήσης")
-    .setDescription("Η κλήση στο κανάλι φωνής <#1141337672477065227> έχει τελειώσει. Η κλήση διέρκησε " + msToTime(Math.abs(new Date() - yeydasd)))
+    .setDescription(`Η κλήση στο κανάλι φωνής <#1141337672477065227> έχει τελειώσει. Η κλήση διήρκησε ${msToTime(Math.abs(new Date() - yeydasd))}`)
     .setFooter({
       text: "Gamecraft Bot",
       iconURL: "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg",
     })
     .setTimestamp();
-  channel13.send({ embeds: [embed3] })
-  await db.delete("/" + channel)
+
+  channel13.send({ embeds: [embed3] });
+  await db.delete("/" + channel);
 };
 
 const usersInCall = {};
 
 client.on('voiceStateUpdate', async (oldState, newState) => {
   if (newState.channel !== null) {
-    if (newState.channelId == "1141338719882846319") { return }
+    if (newState.channelId === "1141338719882846319") return;
     if (newState.selfVideo || newState.selfDeaf || newState.selfMute || newState.serverDeaf || newState.serverMute) {
       return;
     }
+
     const members = newState.channel.members.size;
+
     if (!usersInCall[newState.member.user.id]) {
-      console.log(newState.member.user.displayName + ' joined.');
+      console.log(`${newState.member.user.displayName} joined.`);
       console.log(members);
 
-      // Add user to the table if not already present
-
       usersInCall[newState.member.id] = true;
-      // Call the start function here
-      if (members > 1) { return }
-      callStart(newState.member, newState.channel.name)
-      console.log(newState.member.displayName + ' is in the call.');
+
+      if (members > 1) return;
+
+      callStart(newState.member, newState.channel.name);
+      console.log(`${newState.member.displayName} is in the call.`);
     }
   } else if (oldState.channel) {
-    if (oldState.channelId == "1141338719882846319") { return }
-    const members = oldState.channel.members.size
+    if (oldState.channelId === "1141338719882846319") return;
 
-    console.log(oldState.member.displayName + ' left');
+    const members = oldState.channel.members.size;
+
+    console.log(`${oldState.member.displayName} left`);
     console.log(members);
 
-    // Remove user from the table if they left the call
     if (usersInCall[oldState.member.id]) {
       delete usersInCall[oldState.member.id];
-      // Call the end function here if no users are left in the call
     }
 
     if (oldState.channel.members.size === 0) {
       console.log('No users are in the call.');
-      callEnd(oldState.channel.name)
+      callEnd(oldState.channel.name);
     }
   } else {
     console.log('Neither of the two actions occurred');
-    // ... 
   }
 });
 
-// Log in to Discord with your client's token
 client.login(token);
+loadCommands();
