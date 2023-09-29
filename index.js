@@ -1,15 +1,15 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, MessageEmbed } = require('discord.js');
 const { token } = require('./config.json');
 const { JsonDB, Config } = require('node-json-db');
-const http = require("http");
-
 const db = new JsonDB(new Config("channelDb1", true, false, '/'));
+
+const http = require("http");
 const host = '0.0.0.0';
 const port = 8080;
 
-const requestListener = function(req, res) {
+const requestListener = function (req, res) {
   res.writeHead(200);
   res.end("My first server!");
 };
@@ -43,7 +43,7 @@ const loadCommands = () => {
   }
 };
 
-client.once(Events.ClientReady, async (c) => {
+client.once('ready', async (c) => {
   try {
     require('./deploy-commands.js');
   } catch (error) {
@@ -52,11 +52,10 @@ client.once(Events.ClientReady, async (c) => {
   }
 
   console.log(`Ready! Logged in as ${c.user.tag}`);
-  console.log(eval(2 + 2));
 });
 
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
 
@@ -79,21 +78,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 const callStart = async (person, channel) => {
-  const dateandtime = new Date().toLocaleString("en-BZ", { hour12: true }).replace('pm', 'ΜΜ').replace('am', 'ΠΜ');
-  const absolutedat = new Date();
+  const dateAndTime = new Date().toLocaleString("en-BZ", { hour12: true }).replace('pm', 'ΜΜ').replace('am', 'ΠΜ');
+  const absoluteDate = new Date();
   const pid = person.id;
 
-  await db.push("/" + channel, { pid, dateandtime, absolutedat });
+  await db.push("/" + channel, { pid, dateAndTime, absoluteDate });
 
   const channel13 = await client.channels.fetch("1141341457706405978");
-  const embed2 = new EmbedBuilder()
+  const embed2 = new MessageEmbed()
     .setTitle("Νέα Κλήση")
-    .setDescription(`Ο/Η <@${pid}> Ξεκίνησε μια κλήση στο κανάλι φωνής <#1141337672477065227>, στις ${dateandtime}.`)
+    .setDescription(`Ο/Η <@${pid}> Ξεκίνησε μια κλήση στο κανάλι φωνής <#1141337672477065227>, στις ${dateAndTime}.`)
     .setColor("#00b0f4")
-    .setFooter({
-      text: "Gamecraft Bot",
-      iconURL: "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg",
-    })
+    .setFooter("Gamecraft Bot", "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg")
     .setTimestamp();
 
   channel13.send("@everyone \n");
@@ -118,19 +114,16 @@ const callEnd = async (channel) => {
 
   try {
     yeydasd = await db.getData("/" + channel);
-    yeydasd = yeydasd["absolutedat"];
+    yeydasd = yeydasd["absoluteDate"];
   } catch (error) {
     console.error(error);
   }
 
   const channel13 = await client.channels.fetch("1141341457706405978");
-  const embed3 = new EmbedBuilder()
+  const embed3 = new MessageEmbed()
     .setTitle("Τέλος Κλήσης")
     .setDescription(`Η κλήση στο κανάλι φωνής <#1141337672477065227> έχει τελειώσει. Η κλήση διήρκησε ${msToTime(Math.abs(new Date() - yeydasd))}`)
-    .setFooter({
-      text: "Gamecraft Bot",
-      iconURL: "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg",
-    })
+    .setFooter("Gamecraft Bot", "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg")
     .setTimestamp();
 
   channel13.send({ embeds: [embed3] });
