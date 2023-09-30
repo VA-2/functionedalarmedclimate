@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, GatewayIntentBits, MessageEmbed } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { token } = require('./config.json');
 const { JsonDB, Config } = require('node-json-db');
 const db = new JsonDB(new Config("channelDb1", true, false, '/'));
@@ -9,7 +9,7 @@ const http = require("http");
 const host = '0.0.0.0';
 const port = 8080;
 
-const requestListener = function (req, res) {
+const requestListener = function(req, res) {
   res.writeHead(200);
   res.end("My first server!");
 };
@@ -85,11 +85,14 @@ const callStart = async (person, channel) => {
   await db.push("/" + channel, { pid, dateAndTime, absoluteDate });
 
   const channel13 = await client.channels.fetch("1141341457706405978");
-  const embed2 = new MessageEmbed()
+  const embed2 = new EmbedBuilder()
     .setTitle("Νέα Κλήση")
     .setDescription(`Ο/Η <@${pid}> Ξεκίνησε μια κλήση στο κανάλι φωνής <#1141337672477065227>, στις ${dateAndTime}.`)
     .setColor("#00b0f4")
-    .setFooter("Gamecraft Bot", "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg")
+    .setFooter({
+      text: "Gamecraft Bot",
+      iconURL: "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg"
+    })
     .setTimestamp();
 
   channel13.send("@everyone \n");
@@ -120,10 +123,13 @@ const callEnd = async (channel) => {
   }
 
   const channel13 = await client.channels.fetch("1141341457706405978");
-  const embed3 = new MessageEmbed()
+  const embed3 = new EmbedBuilder()
     .setTitle("Τέλος Κλήσης")
     .setDescription(`Η κλήση στο κανάλι φωνής <#1141337672477065227> έχει τελειώσει. Η κλήση διήρκησε ${msToTime(Math.abs(new Date() - yeydasd))}`)
-    .setFooter("Gamecraft Bot", "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg")
+    .setFooter({
+      text: "Gamecraft Bot",
+      iconURL: "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg"
+    })
     .setTimestamp();
 
   channel13.send({ embeds: [embed3] });
