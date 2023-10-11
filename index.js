@@ -65,7 +65,7 @@ async function repeat() { //First loop of function declined.
     await channel13.bulkDelete(99);
     await channel13.bulkDelete(99);
     repeat(); //Second loop Accepted for loop
-  }, 3000)
+  }, 259200000)
 }
 
 client.once('ready', async (c) => {
