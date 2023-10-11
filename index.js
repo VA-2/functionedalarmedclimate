@@ -47,9 +47,26 @@ async function repeat() { //First loop of function declined.
   setTimeout(async () => {
     const channel13 = await client.channels.fetch("1141341457706405978");
     channel13.send("quifsa")
-    channel13.bulkDelete(9999);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
+    await channel13.bulkDelete(99);
     repeat(); //Second loop Accepted for loop
-  }, 300000)
+  }, 3000)
 }
 
 client.once('ready', async (c) => {
