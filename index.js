@@ -9,7 +9,7 @@ const http = require("http");
 const host = '0.0.0.0';
 const port = 8080;
 
-const requestListener = function(req, res) {
+const requestListener = function (req, res) {
   res.writeHead(200);
   res.end("My first server!");
 };
@@ -43,9 +43,18 @@ const loadCommands = () => {
   }
 };
 
+async function repeat() { //First loop of function declined.
+  setTimeout(async () => {
+    const channel13 = await client.channels.fetch("1141341457706405978");
+    channel13.bulkDelete(9999);
+    repeat(); //Second loop Accepted for loop
+  }, 300000)
+}
+
 client.once('ready', async (c) => {
   try {
     require('./deploy-commands.js');
+    repeat();
   } catch (error) {
     console.log(error);
     return;
