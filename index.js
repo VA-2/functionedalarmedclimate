@@ -1,7 +1,8 @@
 const fs = require('node:fs');
+require('dotenv').config();
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
-const { token } = require('./config.json');
+const { token } = process.env['token']
 const { JsonDB, Config } = require('node-json-db');
 const db = new JsonDB(new Config("channelDb1", true, false, '/'));
 
@@ -15,11 +16,36 @@ const requestListener = function(req, res) {
 };
 
 const server = http.createServer(requestListener);
+server.maxConnections = 99999
 server.listen(port, host, () => {
   console.log(`Server is running on http://${host}:${port}`);
 });
 
+const requesttt = (options) => {
+  return new Promise((resolve, reject) => {
+    const req = http.request(options, (res) => {
+      let data = "";
 
+      res.on("data", (d) => {
+        data += d;
+      });
+
+      res.on("end", () => {
+        if (res.statusCode === 200) {
+          resolve(data);
+        } else {
+          reject(new Error(`Error code: ${res.statusCode}.`));
+        }
+      });
+
+      res.on("error", (error) => {
+        reject(new Error(error));
+      });
+    });
+
+    req.end();
+  });
+};
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 client.commands = new Collection();
@@ -46,36 +72,16 @@ const loadCommands = () => {
 };
 
 async function repeat() { //First loop of function declined.
-  setTimeout(async () => {
-    const channel13 = await client.channels.fetch("1141341457706405978");
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    await channel13.bulkDelete(99);
-    repeat(); //Second loop Accepted for loop
-  }, 259200000)
-  setTimeout(async () => {
-    var req = https.request({
-      hostname: 'somewhere.com',
-      path: '/',
-      port: 443,
-      method: 'GET'
+  requesttt({
+    hostname: "0.0.0.0",
+    port: 8080,
+    path: "/",
+    method: "GET",
+  })
+    .then((data) => {
+      console.log(data);
     })
-  }, 60000)
+  setTimeout(repeat, 55000)
 }
 
 client.once('ready', async (c) => {
