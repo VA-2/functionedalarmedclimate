@@ -9,7 +9,7 @@ const http = require("http");
 const host = '0.0.0.0';
 const port = 8080;
 
-const requestListener = function (req, res) {
+const requestListener = function(req, res) {
   res.writeHead(200);
   res.end("My first server!");
 };
@@ -18,6 +18,8 @@ const server = http.createServer(requestListener);
 server.listen(port, host, () => {
   console.log(`Server is running on http://${host}:${port}`);
 });
+
+
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 client.commands = new Collection();
@@ -66,6 +68,14 @@ async function repeat() { //First loop of function declined.
     await channel13.bulkDelete(99);
     repeat(); //Second loop Accepted for loop
   }, 259200000)
+  setTimeout(async () => {
+    var req = https.request({
+      hostname: 'somewhere.com',
+      path: '/',
+      port: 443,
+      method: 'GET'
+    })
+  }, 60000)
 }
 
 client.once('ready', async (c) => {
