@@ -2,7 +2,7 @@ const fs = require('node:fs');
 require('dotenv').config();
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
-const { token } = process.env['token']
+const token = process.env['token']
 const { JsonDB, Config } = require('node-json-db');
 const db = new JsonDB(new Config("channelDb1", true, false, '/'));
 
@@ -13,6 +13,7 @@ const port = 8080;
 const requestListener = function(req, res) {
   res.writeHead(200);
   res.end("My first server!");
+  console.log("Server is running!");
 };
 
 const server = http.createServer(requestListener);
