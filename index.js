@@ -3,8 +3,20 @@ require('dotenv').config();
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const token = process.env['token']
-const { JsonDB, Config } = require('node-json-db');
-const db = new JsonDB(new Config("channelDb1", true, false, '/'));
+const mongoose = require('mongoose');
+const callSchema = new mongoose.model("Call", mongoose.Schema({
+  channel: { type: String },
+  pid: { type: String },
+  absoluteDate: { type: Date }
+}));
+//const db = new JsonDB(new Config("channelDb1", true, false, '/'));
+
+connecttodb().catch(err => console.log(err));
+
+async function connecttodb() {
+  await mongoose.connect('mongodb+srv://crazycat:Vaggelis2010@cluster0.uv6dmxw.mongodb.net/?retryWrites=true&w=majority');
+  console.log("Connected to mongodb.")
+}
 
 const http = require("http");
 const host = '0.0.0.0';
@@ -121,17 +133,19 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 const callStart = async (person, channel) => {
-  const dateAndTime = new Date().toLocaleString("el-GR", { hour12: true }).replace('pm', 'ΜΜ').replace('am', 'ΠΜ');
-  const absoluteDate = new Date();
-  console.log(absoluteDate)
+  const dateAndTime = new Date(new Date() + 120 * 60 * 1000).toLocaleString("el-GR", { hour12: true })
+  const absoluteDate = new Date(new Date() + 120 * 60 * 1000);
+  console.log(dateAndTime)
   const pid = person.id;
 
-  await db.push("/" + channel, { pid, dateAndTime, absoluteDate });
+  const skeett = new callSchema({channel: channel, pid: pid, absoluteDate: absoluteDate})
+  await skeett.save()
+  //await db.push("/" + channel, { pid, absoluteDate });
 
   const channel13 = await client.channels.fetch("1141341457706405978");
   const embed2 = new EmbedBuilder()
     .setTitle("Νέα Κλήση")
-    .setDescription(`Ο/Η <@${pid}> Ξεκίνησε μια κλήση στο κανάλι φωνής <#1141337672477065227>, στις ${dateAndTime}.`)
+    .setDescription(`Ο/Η <@${pid}> Ξεκίνησε μια κλήση στο κανάλι φωνής <#1141337672477065227>, στις ${dateAndTime}`)
     .setColor("#00b0f4")
     .setFooter({
       text: "Gamecraft Bot",
@@ -160,16 +174,18 @@ const callEnd = async (channel) => {
   let yeydasd;
 
   try {
-    yeydasd = await db.getData("/" + channel);
-    yeydasd = yeydasd["absoluteDate"];
+    yeydasd = await callSchema.findOne({channel: channel})
+    yeydasd = yeydasd["absoluteDate"]
   } catch (error) {
     console.error(error);
   }
 
+  console.log(msToTime(Math.abs(new Date(new Date() + 120 * 60 * 1000) - yeydasd)))
+
   const channel13 = await client.channels.fetch("1141341457706405978");
   const embed3 = new EmbedBuilder()
     .setTitle("Τέλος Κλήσης")
-    .setDescription(`Η κλήση στο κανάλι φωνής <#1141337672477065227> έχει τελειώσει. Η κλήση διήρκησε ${msToTime(Math.abs(new Date() - yeydasd))}`)
+    .setDescription(`Η κλήση στο κανάλι φωνής <#1141337672477065227> έχει τελειώσει. Η κλήση διήρκησε ${msToTime(Math.abs(new Date(new Date() + 120 * 60 * 1000) - yeydasd))}`)
     .setFooter({
       text: "Gamecraft Bot",
       iconURL: "https://cdn.discordapp.com/attachments/1009002117329072139/1154062260768084048/Untitled.jpg"
@@ -177,7 +193,7 @@ const callEnd = async (channel) => {
     .setTimestamp();
 
   channel13.send({ embeds: [embed3] });
-  await db.delete("/" + channel);
+  await callSchema.deleteOne({channel : channel})
 };
 
 const usersInCall = {};
