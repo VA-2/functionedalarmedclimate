@@ -86,7 +86,6 @@ async function repeat() { //First loop of function declined.
 }
 
 client.once('ready', async (c) => {
-  client.user.setActivity('+help', { type: "PLAYING" });
   try {
     require('./deploy-commands.js');
     repeat();
@@ -122,8 +121,9 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 const callStart = async (person, channel) => {
-  const dateAndTime = new Date().toLocaleString("en-BZ", { hour12: true }).replace('pm', 'ΜΜ').replace('am', 'ΠΜ');
+  const dateAndTime = new Date().toLocaleString("el-GR", { hour12: true }).replace('pm', 'ΜΜ').replace('am', 'ΠΜ');
   const absoluteDate = new Date();
+  console.log(absoluteDate)
   const pid = person.id;
 
   await db.push("/" + channel, { pid, dateAndTime, absoluteDate });
