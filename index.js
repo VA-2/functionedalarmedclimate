@@ -86,6 +86,7 @@ async function repeat() { //First loop of function declined.
 }
 
 client.once('ready', async (c) => {
+  client.user.setActivity('+help', { type: "PLAYING" });
   try {
     require('./deploy-commands.js');
     repeat();
