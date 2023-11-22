@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 require('dotenv').config();
 const path = require('node:path');
-const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
 const token = process.env['token']
 const mongoose = require('mongoose');
 const callSchema = new mongoose.model("Call", mongoose.Schema({
@@ -107,6 +107,12 @@ client.once('ready', async (c) => {
   }
 
   console.log(`Ready! Logged in as ${c.user.tag}`);
+
+  client.user.setActivity({
+    type: ActivityType.Custom,
+    name: "customtest",
+    state: "Το μπότ παρακολουθεί την GameCraft."
+  })
 });
 
 client.on('interactionCreate', async (interaction) => {
