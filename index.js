@@ -22,7 +22,7 @@ const http = require("http");
 const host = '0.0.0.0';
 const port = 8080;
 
-const requestListener = function(req, res) {
+const requestListener = function (req, res) {
   res.writeHead(200);
   res.end("My first server!");
   console.log("Server is running!");
@@ -108,10 +108,19 @@ client.once('ready', async (c) => {
 
   console.log(`Ready! Logged in as ${c.user.tag}`);
 
-  client.user.setActivity({
-    type: ActivityType.Custom,
-    name: "customtest",
-    state: "Προστατεύοντας την GameCraft."
+  //client.user.setActivity({
+  //  type: ActivityType.Custom,
+  //  name: "customtest",
+  //  state: "Προστατεύοντας την GameCraft."
+  //})
+
+  client.user.setPresence({
+    activities: [{
+      name: 'Προστατεύοντας την GameCraft.',
+      type: ActivityType.Custom,
+      state: "Προστατεύοντας την GameCraft."
+    }],
+    status: 'idle'
   })
 });
 
