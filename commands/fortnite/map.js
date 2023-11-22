@@ -1,24 +1,27 @@
-const { SlashCommandBuilder } = require('discord.js');
-var fs = require('fs'),
-request = require('request');
+const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+const axios = require("axios")
+var fs = require('fs')
 
-var download = function(uri, filename, callback){
-    request.head(uri, function(err, res, body){
-      console.log('content-type:', res.headers['content-type']);
-      console.log('content-length:', res.headers['content-length']);
-  
-      request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-    });
-  };
+const download_image = (url, image_path) =>
+  axios({
+    url,
+    responseType: 'stream',
+  }).then(
+    response =>
+      new Promise((resolve, reject) => {
+        response.data
+          .pipe(fs.createWriteStream(image_path))
+          .on('finish', () => resolve())
+          .on('error', e => reject(e));
+      }),
+  );
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('fortnitemap')
-        .setDescription('Δίχνει το τρεχών map στο fortnite.'),
-    async execute(interaction) {
-        await download("https://fortnite-api.com/images/map_en.png", "./tempmap.png")
-        interaction.reply({files: [{ attachment: "./tempmap.png" }]})
-        await setTimeout(5000)
-        fs.unlink("./tempmap.png")
-    },
+  data: new SlashCommandBuilder()
+    .setName('fortnitemap')
+    .setDescription('Δίχνει το τρεχών map στο fortnite.'),
+  async execute(interaction) {
+    const attachment = new AttachmentBuilder("./map_en.png");
+    interaction.reply({ files: [attachment] });
+  },
 };
