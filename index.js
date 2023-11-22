@@ -111,7 +111,7 @@ client.once('ready', async (c) => {
   client.user.setActivity({
     type: ActivityType.Custom,
     name: "customtest",
-    state: "Το μπότ παρακολουθεί την GameCraft."
+    state: "Προστατεύοντας την GameCraft."
   })
 });
 
@@ -144,7 +144,7 @@ const callStart = async (person, channel) => {
   console.log(dateAndTime)
   const pid = person.id;
 
-  const skeett = new callSchema({channel: channel, pid: pid, absoluteDate: absoluteDate})
+  const skeett = new callSchema({ channel: channel, pid: pid, absoluteDate: absoluteDate })
   await skeett.save()
   //await db.push("/" + channel, { pid, absoluteDate });
 
@@ -180,7 +180,7 @@ const callEnd = async (channel) => {
   let yeydasd;
 
   try {
-    yeydasd = await callSchema.findOne({channel: channel})
+    yeydasd = await callSchema.findOne({ channel: channel })
     yeydasd = yeydasd["absoluteDate"]
   } catch (error) {
     console.error(error);
@@ -199,7 +199,7 @@ const callEnd = async (channel) => {
     .setTimestamp();
 
   channel13.send({ embeds: [embed3] });
-  await callSchema.deleteOne({channel : channel})
+  await callSchema.deleteOne({ channel: channel })
 };
 
 const usersInCall = {};
