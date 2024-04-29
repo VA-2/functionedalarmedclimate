@@ -1,7 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require("discord.js");
 
 function toCelsius(kelvin) {
-  if (Number.isFinite(kelvin)) { // Checking if kelvin is a number.
+  if (Number.isFinite(kelvin)) {
+    // Checking if kelvin is a number.
     const KELVIN_CELSIUS_DIFF = 273.15; // maybe unnecessary here, but it is good practice to avoid magic numbers.
     let celsius = kelvin - KELVIN_CELSIUS_DIFF;
     return celsius; // could also be just return kelvin - KELVIN_CELSIUS_DIFF;
@@ -12,15 +13,16 @@ function toCelsius(kelvin) {
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('weatherbyzip')
-    .setDescription('Λέει τον καιρό, βασίζοντας στον ταχυδρομικό κώδικα.')
-    .addStringOption(option =>
+    .setName("weatherbyzip")
+    .setDescription("Λέει τον καιρό, βασίζοντας στον ταχυδρομικό κώδικα.")
+    .addStringOption((option) =>
       option
-        .setName('zipcode')
-        .setDescription('Ταχυδρομικός κώδικας.')
-        .setRequired(true)),
+        .setName("zipcode")
+        .setDescription("Ταχυδρομικός κώδικας.")
+        .setRequired(true),
+    ),
   async execute(interaction) {
-    const yeees3 = await interaction.options.getString("zipcode")
+    /*const yeees3 = await interaction.options.getString("zipcode")
     if (yeees3.length !== 5) {
       interaction.reply("no weder for you shanjeet...")
     } else {
@@ -46,6 +48,9 @@ module.exports = {
 Χαμηλότερη θερμοκρασία ημέρας: ${(toCelsius(eeerreer.main.temp_min)).toFixed()}° C
 `
       )
-    }
+    }*/
+    await interaction.reply(
+      "Το command είναι υπό επιτήρηση. Παρακαλώ δοκιμάστε αργότερα.",
+    );
   },
 };

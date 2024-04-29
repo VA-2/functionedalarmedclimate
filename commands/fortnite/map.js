@@ -2,6 +2,8 @@ const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const axios = require("axios")
 var fs = require('fs')
 
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 const download_image = (url, image_path) =>
   axios({
     url,
@@ -21,7 +23,9 @@ module.exports = {
     .setName('fortnitemap')
     .setDescription('Δίχνει το τρεχών map στο fortnite.'),
   async execute(interaction) {
-    const attachment = new AttachmentBuilder("./map_en.png");
-    interaction.reply({ files: [attachment] });
+    const attachment = new AttachmentBuilder("map_en.png");
+    interaction.deferReply();
+    await delay(1500)
+    interaction.editReply({ files: [attachment] });
   },
 };
